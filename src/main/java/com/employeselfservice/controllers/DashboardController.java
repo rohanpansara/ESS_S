@@ -81,7 +81,7 @@ public class DashboardController {
         }
     }
 
-    @GetMapping("/user/applyLeave")
+    @PostMapping("/user/applyLeave")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> applyForLeave(@RequestBody LeaveRequest leaveRequest){
         try {
