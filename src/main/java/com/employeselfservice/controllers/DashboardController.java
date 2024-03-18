@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/auth")
@@ -111,13 +112,13 @@ public class DashboardController {
         }
     }
 
-    @PostMapping("/user/attendance")
+    @GetMapping("/user/attendance")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> calculateAttendance(@RequestParam long employeeId, @RequestParam String date) {
+    public ResponseEntity<ApiResponse> calculateAttendance(@RequestParam long id) {
         try {
-            System.out.println(employeeId);
-            LocalDate localDate = LocalDate.parse(date);
-            Attendance calculatedAttendance = attendanceService.calculateAttendance((Long)employeeId, localDate);
+            System.out.println(id);
+            System.out.println(LocalDate.now());
+            Attendance calculatedAttendance = attendanceService.calculateAttendance(id, LocalDate.now());
             if (calculatedAttendance != null) {
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("Attendance Fetched");
@@ -127,12 +128,15 @@ public class DashboardController {
                 apiResponse.setMessage("Couldn't Fetch Attendance");
             }
             return ResponseEntity.ok(apiResponse);
+        } catch (NoSuchElementException e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Employee not found with ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Internal Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
-
 }
 
