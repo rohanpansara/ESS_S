@@ -24,7 +24,7 @@ public class Leave {
     }
 
     public enum LeaveType {
-        PAID, UNPAID;
+        PRIVILEGE,MATERNITY,PATERNITY,PAID, UNPAID;
     }
 
     @Id
