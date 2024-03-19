@@ -46,7 +46,8 @@ public class SecurityConfig {
                                         request -> request.getRequestURI().startsWith("/auth/login"),
                                         request -> request.getRequestURI().startsWith("/auth/punch"),
                                         request -> request.getRequestURI().startsWith("/auth/holiday/getAll"),
-                                        request -> request.getRequestURI().startsWith("/auth/notification")
+                                        request -> request.getRequestURI().startsWith("/auth/notification"),
+                                        request -> request.getRequestURI().startsWith("/auth/attendance")
                                 ).permitAll()
                                 .requestMatchers(
                                         new AntPathRequestMatcher("/auth/user/**"),
