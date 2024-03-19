@@ -82,42 +82,9 @@ public class DashboardController {
         }
     }
 
-    @PostMapping("/user/applyLeave")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> applyForLeave(@RequestBody LeaveRequest leaveRequest){
-        try {
-            if (leaveRequest.getLeaveFrom().isAfter(LocalDate.now()) || leaveRequest.getLeaveTo().isEqual(LocalDate.now())) {
-
-                String leaveResponse = leaveService.applyForLeave(leaveRequest);
-                if (leaveResponse.equals("applied")) {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("Leave Applied Successfully");
-                } else {
-                    apiResponse.setSuccess(false);
-                    apiResponse.setMessage("Error Applying For Leave");
-                }
-            } else {
-                // cannot apply for leave before today
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Cannot Apply For Leave Before "+ LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                return ResponseEntity.badRequest().body(apiResponse);
-            }
-
-            // on success response
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
-        }
-    }
-
-    @GetMapping("/user/attendance")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @GetMapping("/attendance")
     public ResponseEntity<ApiResponse> calculateAttendance(@RequestParam long id) {
         try {
-            System.out.println(id);
-            System.out.println(LocalDate.now());
             Attendance calculatedAttendance = attendanceService.calculateAttendance(id, LocalDate.now());
             if (calculatedAttendance != null) {
                 apiResponse.setSuccess(true);
@@ -139,4 +106,3 @@ public class DashboardController {
         }
     }
 }
-
