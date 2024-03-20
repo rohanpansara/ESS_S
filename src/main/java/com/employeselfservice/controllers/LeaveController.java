@@ -4,6 +4,7 @@ import com.employeselfservice.dao.request.LeaveRequest;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Leave;
 import com.employeselfservice.services.LeaveService;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -71,36 +72,53 @@ public class LeaveController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> applyForLeave(@RequestBody LeaveRequest leaveRequest){
         try {
-            if (leaveRequest.getLeaveFrom().isAfter(LocalDate.now()) || leaveRequest.getLeaveFrom().isEqual(LocalDate.now())) {
-                if(leaveRequest.getLeaveTo().isBefore(leaveRequest.getLeaveFrom())){
+            LocalDate today = LocalDate.now();
+            LocalDate leaveFrom = leaveRequest.getLeaveFrom();
+            LocalDate leaveTo = leaveRequest.getLeaveTo();
+
+            if (leaveFrom.isAfter(today.minusDays(1))) {
+                if (leaveTo.isBefore(leaveFrom)) {
+                    // Return error response if 'Absence To' is before 'Absence From'
                     apiResponse.setSuccess(false);
                     apiResponse.setMessage("'Absence To' cannot be before 'Absence From'");
                     System.out.println("Absence Date Error");
+                    apiResponse.setData(null);
                     return ResponseEntity.badRequest().body(apiResponse);
-                }
-                else {
+                } else {
+                    // Apply for leave if conditions are met
                     String leaveResponse = leaveService.applyForLeave(leaveRequest);
-                    if (leaveResponse.equals("applied")) {
+                    if (leaveResponse.equals("Leave_Applied")) {
                         apiResponse.setSuccess(true);
-                        apiResponse.setMessage("Leave Applied Successfully");
+                        apiResponse.setMessage("Leave Application Sent");
+                        apiResponse.setData(null);
                         System.out.println("Leave Applied Successfully!");
                     } else {
+                        // Return error response if leave application fails
                         apiResponse.setSuccess(false);
                         apiResponse.setMessage("Error Applying For Leave");
+                        apiResponse.setData(null);
                         return ResponseEntity.badRequest().body(apiResponse);
                     }
                 }
             } else {
-                // cannot apply for leave before today
+                // Return error response if trying to apply for leave before today
                 apiResponse.setSuccess(false);
-                apiResponse.setMessage("Cannot Apply For Leave Before "+ LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                apiResponse.setMessage("Cannot Apply For Leave Before " + today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 return ResponseEntity.badRequest().body(apiResponse);
             }
+            // Return success response if all conditions pass
             return ResponseEntity.ok(apiResponse);
+        }catch (ExpiredJwtException e) {
+            // Handle expired JWT token exception
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Token Expired. Login Again");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } catch (Exception e) {
+            // Return internal server error response if an exception occurs
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Internal Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
+
     }
 }
