@@ -24,7 +24,7 @@ public class Leave {
     }
 
     public enum LeaveType {
-        PRIVILEGE,MATERNITY,PATERNITY,PAID, UNPAID;
+        PRIVILEGE,MATERNITY,PATERNITY;
     }
 
     @Id
@@ -56,4 +56,13 @@ public class Leave {
     @Enumerated(EnumType.STRING)
     @Column(name = "l_type")
     private LeaveType type;
+
+    @Column(name = "l_days")
+    private double days;
+
+    @Column(name = "l_month")
+    private int month;
+
+    @Column(name = "l_overflow")
+    private double overflow;
 }
