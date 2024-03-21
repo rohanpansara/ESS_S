@@ -34,10 +34,17 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
     List<Leave> findAllByEmployeeIdAndMonthDesc(@Param("employeeId") Long employeeId, @Param("month") int month);
 
 
-    @Query("SELECT COALESCE(MAX(l.overflow), 0) FROM Leave l WHERE l.employee.id = :employeeId AND MONTH(l.from) = :month")
+//    @Query("SELECT COALESCE(MAX(l.overflow), 0) FROM Leave l WHERE l.employee.id = :employeeId AND MONTH(l.from) = :month")
+//    double getOverflowForLatestLeaveInMonth(
+//            @Param("employeeId") Long employeeId,
+//            @Param("month") int month
+//    );
+
+    @Query("SELECT COALESCE(MAX(l.overflow), 0) FROM Leave l WHERE l.employee.id = :employeeId AND MONTH(l.from) = :month AND l.status = 'APPROVED'")
     double getOverflowForLatestLeaveInMonth(
             @Param("employeeId") Long employeeId,
             @Param("month") int month
     );
+
 }
 
