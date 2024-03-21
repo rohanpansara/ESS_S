@@ -64,5 +64,5 @@ public class Leave {
     private int month;
 
     @Column(name = "l_overflow")
-    private double overflow;
+    private double overflow ;
 }
